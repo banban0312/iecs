@@ -7,6 +7,15 @@ class TaskContext:
     step_id: str
     slots: dict[str, Any] = field(default_factory=dict)
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "TaskContext":
+        return cls(
+            flow_id=data["flow_id"],
+            step_id=data.get("step_id"),
+            slots=dict(data.get("slots", {})),
+        )
+
+
 
 @dataclass(slots=True)
 class SystemContext:
@@ -16,6 +25,12 @@ class SystemContext:
     flow_id: str
     step_id: str
 
+    @classmethod
+    def from_dict(cls, raw_sys: dict) -> "SystemContext":
+        flow_id = raw_sys.get("flow_id")
+        return SYSTEM_CONTEXT_DICT[flow_id].from_dict(raw_sys)
+
+
 @dataclass(slots=True)
 class StartedSystemContext(SystemContext):
     """
@@ -23,6 +38,15 @@ class StartedSystemContext(SystemContext):
     """
     started_flow_id: str
     started_flow_name: str
+
+    @classmethod
+    def from_dict(cls, raw_sys: dict) -> "StartedSystemContext":
+        return cls(
+            flow_id=raw_sys.get("flow_id"),
+            step_id=raw_sys.get("step_id"),
+            started_flow_id=raw_sys.get("started_flow_id"),
+            started_flow_name=raw_sys.get("started_flow_name"),
+        )
 
 @dataclass(slots=True)
 class ResumedSystemContext(SystemContext):
@@ -32,11 +56,29 @@ class ResumedSystemContext(SystemContext):
     resumed_flow_id: str
     resumed_flow_name: str
 
+    @classmethod
+    def from_dict(cls, raw_sys: dict)->"ResumedSystemContext":
+        return cls(
+            flow_id=raw_sys["flow_id"],
+            step_id=raw_sys["step_id"],
+            resumed_flow_id=raw_sys["resumed_flow_id"],
+            resumed_flow_name=raw_sys["resumed_flow_name"],
+        )
+
 @dataclass(slots=True)
 class CannotHandleSystemContext(SystemContext):
     """
         system_cannot_handle系统任务的上下文
     """
+    reason: str
+
+    @classmethod
+    def from_dict(cls, raw_sys: dict)->"CannotHandleSystemContext":
+        return cls(
+            flow_id=raw_sys["flow_id"],
+            step_id=raw_sys["step_id"],
+            reason=raw_sys["reason"],
+        )
 
 @dataclass(slots=True)
 class CollectSystemContext(SystemContext):
@@ -45,6 +87,15 @@ class CollectSystemContext(SystemContext):
     """
     slot_name: str
     response: dict = field(default_factory=dict)
+
+    @classmethod
+    def from_dict(cls, raw_sys: dict)->"CollectSystemContext":
+        return cls(
+            flow_id=raw_sys["flow_id"],
+            step_id=raw_sys["step_id"],
+            slot_name=raw_sys["slot_name"],
+            response=raw_sys.get("response", {}),
+        )
 
 @dataclass(slots=True)
 class InterruptedSystemContext(SystemContext):
@@ -56,6 +107,17 @@ class InterruptedSystemContext(SystemContext):
     started_flow_id: str | None = None
     started_flow_name: str | None = None
 
+    @classmethod
+    def from_dict(cls, raw_sys: dict)->"InterruptedSystemContext":
+        return cls(
+            flow_id=raw_sys["flow_id"],
+            step_id=raw_sys["step_id"],
+            interrupted_flow_id=raw_sys["interrupted_flow_id"],
+            interrupted_flow_name=raw_sys["interrupted_flow_name"],
+            started_flow_id=raw_sys.get("started_flow_id"),
+            started_flow_name=raw_sys.get("started_flow_name"),
+        )
+
 @dataclass(slots=True)
 class CanceledSystemContext(SystemContext):
     """
@@ -64,7 +126,23 @@ class CanceledSystemContext(SystemContext):
     canceled_flow_id: str
     canceled_flow_name: str
 
+    @classmethod
+    def from_dict(cls, raw_sys: dict)->"CanceledSystemContext":
+        return cls(
+            flow_id=raw_sys["flow_id"],
+            step_id=raw_sys["step_id"],
+            canceled_flow_id=raw_sys["canceled_flow_id"],
+            canceled_flow_name=raw_sys["canceled_flow_name"],
+        )
 
+SYSTEM_CONTEXT_DICT= {
+    "system_task_started": StartedSystemContext,
+    "system_task_resumed": ResumedSystemContext,
+    "system_cannot_handle": CannotHandleSystemContext,
+    "system_collect_information": CollectSystemContext,
+    "system_task_interrupted": InterruptedSystemContext,
+    "system_task_canceled": CanceledSystemContext,
+}
 
 
 

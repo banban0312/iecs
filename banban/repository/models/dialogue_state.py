@@ -3,7 +3,10 @@ from sqlalchemy.orm import DeclarativeBase, Mapped
 from sqlalchemy.testing.schema import mapped_column
 
 # orm映射 Object Relation-ship Mapping 对象关系映射
-class DialogueStateRecord( DeclarativeBase ):
+class Base(DeclarativeBase):
+    pass
+
+class DialogueStateRecord( Base ):
 
     __tablename__ = 'dialogue_states'
 
