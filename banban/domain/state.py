@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any
 
+from banban.domain.contexts import TaskContext, SystemContext
 from banban.domain.messages import BotMessage
 
 
@@ -34,7 +35,16 @@ class Session:
     closed_at: float
     turns: list[Turn] = field(default_factory=list)
 
-
+@dataclass(slots=True)
+class DialogueState:
+    sender_id: str
+    active_task: TaskContext | None = None
+    paused_tasks: list[TaskContext] = field(default_factory=list)
+    active_system_task: SystemContext | None = None
+    focused_object: FocusedObject | None = None
+    sessions: list[Session] = field(default_factory=list)
+    current_session_id: str | None = None
+    pending_turn: Turn | None = None
 
 
 
