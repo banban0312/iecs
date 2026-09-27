@@ -3,41 +3,51 @@ import uuid
 from fastapi import APIRouter, Depends
 
 from banban.api.deps import get_dialogue_service
-from banban.api.schemas import ChatHistoryResponse, ChatResponse, ChatRequest, BotMessageResponse, ChatObjectPayload
+from banban.api.schemas import ChatHistoryResponse, ChatResponse, ChatRequest, BotMessageResponse, ChatObjectPayload, \
+    ChatHistoryMessageResponse
 from banban.domain.messages import UserMessage, ProcessResult
 from banban.service.dialogue_service import DialogueService
 
 router = APIRouter()
 
-@router.get("/api/chat/history",response_model=ChatHistoryResponse)
-async def get_history(sender_id:str):
-
+@router.get("/api/chat/history", response_model=ChatHistoryResponse)
+async def chat_history(sender_id:str):
     print("sender_id:", sender_id)
-
+    # TODO 调用service查询当前用户的历史记录
     return ChatHistoryResponse(
-        sender_id = sender_id,
-        messages = [
-
+        sender_id=sender_id,
+        messages=[
+            ChatHistoryMessageResponse(
+                role="user",
+                text="你好呀",
+                object=None
+            ),
+            ChatHistoryMessageResponse(
+                role="bot",
+                text="你好，很高兴为你服务。",
+                object=None
+            ),
+            ChatHistoryMessageResponse(
+                role="user",
+                text="请给我推荐一款U盘？",
+                object=None
+            ),
+            ChatHistoryMessageResponse(
+                role="bot",
+                text=None,
+                object=ChatObjectPayload(
+                    type="product",
+                    id="1234567890",
+                    title="联想U盘-128GB",
+                    attributes={
+                        "size": "128GB",
+                        "color": "white",
+                        "price": "49.99"
+                    }
+                )
+            ),
         ]
     )
-
-
-
-    # return {
-    #     "sender_id": "user_001",
-    #     "messages": [
-    #         {
-    #             "role": "user",
-    #             "text": "帮我查一下订单状态",
-    #             "object": None
-    #         },
-    #         {
-    #             "role": "bot",
-    #             "text": "请告诉我你的订单号。",
-    #             "object": None
-    #         }
-    #     ]
-    # }
 
 @router.post("/api/chat",response_model=ChatResponse)
 async def chat(
@@ -60,7 +70,7 @@ async def chat(
     user_message = UserMessage.from_dict(dict_data)
 
     # 2.调用DialogueService类中的process_message方法进行对话处理
-    process_result:ProcessResult = dialogue_service.process_message(user_message)
+    process_result:ProcessResult = await dialogue_service.process_message(user_message)
 
     # 3.将领域模型 process_result 转换成交互模型 ChatResponse
     messages = []
