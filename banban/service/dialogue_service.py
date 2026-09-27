@@ -1,7 +1,8 @@
-from banban.domain.messages import UserMessage, ProcessResult, BotMessage, MessageObject
+from banban.domain.messages import UserMessage, ProcessResult
 from banban.domain.state import DialogueState
+from banban.engine.dialogue_engine import DialogueEngine
 from banban.repository.dialogue_state_repository import DialogueStateRepository
-from engine.dialogue_engine import DialogueEngine
+
 
 
 class DialogueService:

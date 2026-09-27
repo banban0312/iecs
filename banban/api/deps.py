@@ -3,11 +3,12 @@ from functools import lru_cache
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from banban.engine.dialogue_engine import DialogueEngine
 from banban.infrastructure import database
 from banban.repository.dialogue_state_repository import DialogueStateRepository
 from banban.service.dialogue_service import DialogueService
-from engine.builder import build_dialogue_engine
-from engine.dialogue_engine import DialogueEngine
+from banban.engine.builder import build_dialogue_engine
+
 
 
 async def get_session()->AsyncSession:
