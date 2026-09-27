@@ -1,6 +1,7 @@
 import time
+import uuid
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, List
 
 from banban.domain.contexts import TaskContext, SystemContext
 from banban.domain.messages import BotMessage, UserMessage
@@ -16,6 +17,14 @@ class FocusedObject:
     title: str
     attributes: dict[str, Any] = field(default_factory=dict)
 
+    def to_dict(self)->dict:
+        return {
+            "type": self.type,
+            "id": self.id,
+            "title": self.title,
+            "attributes": self.attributes,
+        }
+
     @classmethod
     def from_dict(cls, raw_focused: dict[str, Any])->"FocusedObject":
         return cls(**raw_focused)
@@ -29,6 +38,13 @@ class Turn:
     turn_id: str
     input_message: UserMessage
     assistant_messages: list[BotMessage] = field(default_factory=list)
+
+    def to_dict(self)->dict:
+        return {
+            "turn_id": self.turn_id,
+            "input_message": self.input_message.to_dict(),
+            "assistant_messages": [m.to_dict() for m in self.assistant_messages],
+        }
 
     @classmethod
     def from_dict(cls, data)->"Turn":
@@ -48,8 +64,17 @@ class Session:
     session_id: str
     started_at: float
     last_activity_at: float
-    closed_at: float
+    closed_at: float|None = None
     turns: list[Turn] = field(default_factory=list)
+
+    def to_dict(self)->dict:
+        return {
+            "session_id": self.session_id,
+            "started_at": self.started_at,
+            "last_activity_at": self.last_activity_at,
+            "closed_at": self.closed_at,
+            "turns": [turn.to_dict() for turn in self.turns],
+        }
 
     @classmethod
     def from_dict(cls, data)->"Session":
@@ -73,12 +98,22 @@ class DialogueState:
     current_session_id: str | None = None
     pending_turn: Turn | None = None
 
+    def to_dict(self)->dict:
+        return {
+            "sender_id": self.sender_id,
+            "active_task":  self.active_task.to_dict() if self.active_task else None,
+            "paused_tasks": [ task.to_dict() for task in self.paused_tasks ],
+            "active_system_task": self.active_system_task.to_dict() if self.active_system_task else None,
+            "focused_object": self.focused_object.to_dict() if self.focused_object else None,
+            "sessions": [ session.to_dict() for session in self.sessions],
+            "current_session_id":self.current_session_id
+        }
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "DialogueState":
         """从字典还原 DialogueState。"""
         state = cls(sender_id=data["sender_id"])
-        # 当前用户任务
-        raw_task = data.get("active_task")
+
         state.active_task = TaskContext.from_dict(raw_task) if raw_task else None
         # 挂起的任务
         state.paused_tasks = [TaskContext.from_dict(task) for task in data.get("paused_tasks", [])]
@@ -95,8 +130,48 @@ class DialogueState:
         # 返回从字典还原成DialogueState对象的state
         return state
 
+    def get_current_session(self)->Session|None:
+        if self.current_session_id is None:
+            return None
+        for session in self.sessions:
+            if session.session_id == self.current_session_id:
+                return session
 
+    def start_session(self):
+        now_time = time.time()
+        new_session = Session(
+            session_id= str(uuid.uuid4()),
+            started_at=now_time,
+            last_activity_at=now_time
+        )
+        self.sessions.append(new_session)
+        self.current_session_id = new_session.session_id
 
+    def close_current_session(self):
+        self.get_current_session().closed_at = time.time()
+        self.current_session_id = None
+
+    def reset_runtime_state_for_new_session(self):
+        self.active_task = None
+        self.active_system_task = None
+        self.focused_object = None
+        self.paused_tasks = []
+
+    def update_session_last_activity(self):
+        self.get_current_session().last_activity_at = time.time()
+
+    def begin_turn(self, user_message: UserMessage):
+        self.pending_turn = Turn(
+            turn_id=str(uuid.uuid4()),
+            input_message=user_message
+        )
+
+    def fill_pending_turn(self,messages:List[BotMessage]):
+        self.pending_turn.assistant_messages = messages
+
+    def commit_pending_turn(self):
+        self.get_current_session().turns.append(self.pending_turn)
+        self.pending_turn = None
 
 
 

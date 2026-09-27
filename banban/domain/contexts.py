@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from typing import Any
 
 @dataclass(slots=True)
@@ -6,6 +6,9 @@ class TaskContext:
     flow_id: str
     step_id: str
     slots: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self)->dict:
+        return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "TaskContext":
@@ -25,6 +28,12 @@ class SystemContext:
     flow_id: str
     step_id: str
 
+    def to_dict(self)->dict:
+        return {
+            "flow_id": self.flow_id,
+            "step_id": self.step_id,
+        }
+
     @classmethod
     def from_dict(cls, raw_sys: dict) -> "SystemContext":
         flow_id = raw_sys.get("flow_id")
@@ -38,6 +47,14 @@ class StartedSystemContext(SystemContext):
     """
     started_flow_id: str
     started_flow_name: str
+
+    def to_dict(self)->dict:
+        return {
+            "flow_id": self.flow_id,
+            "step_id": self.step_id,
+            "started_flow_id": self.started_flow_id,
+            "started_flow_name": self.started_flow_name,
+        }
 
     @classmethod
     def from_dict(cls, raw_sys: dict) -> "StartedSystemContext":
@@ -56,6 +73,14 @@ class ResumedSystemContext(SystemContext):
     resumed_flow_id: str
     resumed_flow_name: str
 
+    def to_dict(self)->dict:
+        return {
+            "flow_id": self.flow_id,
+            "step_id": self.step_id,
+            "resumed_flow_id": self.resumed_flow_id,
+            "resumed_flow_name": self.resumed_flow_name,
+        }
+
     @classmethod
     def from_dict(cls, raw_sys: dict)->"ResumedSystemContext":
         return cls(
@@ -72,6 +97,13 @@ class CannotHandleSystemContext(SystemContext):
     """
     reason: str
 
+    def to_dict(self)->dict:
+        return {
+            "flow_id": self.flow_id,
+            "step_id": self.step_id,
+            "reason": self.reason,
+        }
+
     @classmethod
     def from_dict(cls, raw_sys: dict)->"CannotHandleSystemContext":
         return cls(
@@ -87,6 +119,14 @@ class CollectSystemContext(SystemContext):
     """
     slot_name: str
     response: dict = field(default_factory=dict)
+
+    def to_dict(self) -> dict:
+        return {
+            "flow_id": self.flow_id,
+            "step_id": self.step_id,
+            "slot_name": self.slot_name,
+            "response": self.response,
+        }
 
     @classmethod
     def from_dict(cls, raw_sys: dict)->"CollectSystemContext":
@@ -107,6 +147,16 @@ class InterruptedSystemContext(SystemContext):
     started_flow_id: str | None = None
     started_flow_name: str | None = None
 
+    def to_dict(self)->dict:
+        return {
+            "flow_id": self.flow_id,
+            "step_id": self.step_id,
+            "interrupted_flow_id": self.interrupted_flow_id,
+            "interrupted_flow_name": self.interrupted_flow_name,
+            "started_flow_id": self.started_flow_id,
+            "started_flow_name": self.started_flow_name,
+        }
+
     @classmethod
     def from_dict(cls, raw_sys: dict)->"InterruptedSystemContext":
         return cls(
@@ -125,6 +175,14 @@ class CanceledSystemContext(SystemContext):
     """
     canceled_flow_id: str
     canceled_flow_name: str
+
+    def to_dict(self)->dict:
+        return {
+            "flow_id": self.flow_id,
+            "step_id": self.step_id,
+            "canceled_flow_id": self.canceled_flow_id,
+            "canceled_flow_name": self.canceled_flow_name,
+        }
 
     @classmethod
     def from_dict(cls, raw_sys: dict)->"CanceledSystemContext":

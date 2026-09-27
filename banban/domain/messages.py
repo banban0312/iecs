@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Any
 
 
-class MessageType(Enum):
+class MessageType(str,Enum):
     TEXT = "text"
     OBJECT = "object"
 
