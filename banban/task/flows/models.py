@@ -151,7 +151,19 @@ class Flow:
     steps:list[FlowStep] = field(default_factory=list)
     slots:list[FlowSlot] = field(default_factory=list)
 
+    def get_start_step(self)->FlowStep:
+        for step in self.steps:
+            if step.type == FlowStepType.START:
+                return step
+        raise Exception("No start step found in current flow")
+
 @dataclass(slots=True)
 class FlowsList:
     slots: dict[str, FlowSlot] = field(default_factory=dict)
     flows: list[Flow] = field(default_factory=list)
+
+    def get_flow_by_id(self, flow_id:str)->Flow|None:
+        for flow in self.flows:
+            if flow.id == flow_id:
+                return flow
+        return None
