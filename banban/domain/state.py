@@ -113,7 +113,8 @@ class DialogueState:
     def from_dict(cls, data: dict[str, Any]) -> "DialogueState":
         """从字典还原 DialogueState。"""
         state = cls(sender_id=data["sender_id"])
-
+        # 当前用户任务
+        raw_task = data.get("active_task")
         state.active_task = TaskContext.from_dict(raw_task) if raw_task else None
         # 挂起的任务
         state.paused_tasks = [TaskContext.from_dict(task) for task in data.get("paused_tasks", [])]
