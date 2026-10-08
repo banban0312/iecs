@@ -24,7 +24,7 @@ def init_db_engine_and_session_factory():
     global engine, session_factory
     engine = create_async_engine(
         url=settings.database_url,      # 数据库连接串
-        echo=True,                      # 是否开启 SQL 日志
+        echo=False,                      # 是否开启 SQL 日志
         pool_size=10,                   # 连接池大小
         pool_pre_ping=False,            # 是否开启连接预检查
     )

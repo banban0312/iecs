@@ -8,6 +8,7 @@ from banban.domain.messages import BotMessage
 from banban.domain.state import DialogueState
 from banban.infrastructure.ai_clients import llm_client
 from banban.prompts.history_builder import build_history
+from banban.prompts.prompt_loader import load_prompt
 from banban.task.action.base import Action, ActionResult
 
 
@@ -19,9 +20,6 @@ class ActionResponse(Action):
 
         if mode == "static":
             # 静态模式创建机器回复
-            # mdoe : static
-            # text: "订单{{ slots.order_number }}当前状态是：{{ slots.order_status }}。{{ slots.order_summary }}"
-            # text: "好的，我们先处理{{ context.started_flow_name }}。"
             text = args.get("text","")
             data = {
                 "slots": state.active_task.slots if state.active_task else {},
@@ -45,16 +43,7 @@ class ActionResponse(Action):
             rendered_text = Template(text).render(data)
             # 2.调用LLM对渲染后的回复消息进行改写
             # 模板
-            prompt_text = args.get("prompt", """你是一个中文电商客服助手，语气自然、友好、简洁。
-                                                            请结合对话上下文，把下面的建议回复改写得更自然，但不要改变含义。
-
-                                                            对话历史：
-                                                            {{ history }}
-
-                                                            用户最后一句：
-                                                            {{ user_message }}
-
-                                                            建议回复：{{ current_response }}""")
+            prompt_text = load_prompt("task_action_response_rephrase")
             # 数据
             prompt_inputs = {
                 "history": build_history(state.get_current_session().turns),
@@ -77,12 +66,7 @@ class ActionResponse(Action):
         else:
             # 生成模式创建机器回复
             # 模板
-            prompt_text = args.get("prompt", """你是一个中文电商客服助手，语气自然、友好、简洁。
-                                                请根据对话上下文和用户最后一句，生成一句客服回复。
-
-                                                对话历史：{{ history }}
-
-                                                用户最后一句：{{ user_message }}""")
+            prompt_text = load_prompt("task_action_response_generate")
             # 数据
             prompt_inputs = {
                 "history": build_history(state.get_current_session().turns),

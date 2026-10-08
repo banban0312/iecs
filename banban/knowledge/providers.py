@@ -4,9 +4,9 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List
 
-from atguigu.conf.config import settings
-from atguigu.domain.state import DialogueState, FocusedObject
-from atguigu.infrastructure import http_util
+from banban.conf.config import settings
+from banban.domain.state import DialogueState, FocusedObject
+from banban.infrastructure import http_util
 
 
 @dataclass

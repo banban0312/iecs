@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+from banban.clarify.reason import ClarifyReason
 from banban.task.commands.models import Command
 
 
@@ -40,3 +41,8 @@ class TurnPlan:
             knowledge= KnowledgeTurnPlan.from_dict(dict_data.get("knowledge")) if dict_data.get("knowledge") else None,
             chitchat=  ChitchatTurnPlan() if dict_data.get("chitchat") is not None else None
         )
+
+@dataclass(slots=True)
+class TurnPlanValidationResult:
+    valid: bool
+    reason: ClarifyReason | None = None

@@ -46,11 +46,11 @@ flows:
       - id: start
         type: start
         next:
-          - if: "context.reason == 'clarification_rejected'"
+          - if: "context.get('reason') == 'clarification_rejected'"
             then: clarification_rejected
-          - if: "context.reason == 'not_supported'"
+          - if: "context.get('reason') == 'not_supported'"
             then: not_supported
-          - if: "context.reason == 'no_relevant_answer'"
+          - if: "context.get('reason') == 'no_relevant_answer'"
             then: no_relevant_answer
           - else: ask_rephrase
 
@@ -164,7 +164,7 @@ flows:
           mode: static
           text: "好的，我们先把{{ context.interrupted_flow_name }}放一放。"
         next:
-          - if: "context.started_flow_name"
+          - if: "context.get('started_flow_name')"
             then: announce_started
           - else: end
 

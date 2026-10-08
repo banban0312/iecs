@@ -1,11 +1,15 @@
 from pathlib import Path
 
+from banban.chitchat.handler import ChitchatHandler
+from banban.clarify.responder import ClarifyResponder
 from banban.engine.dialogue_engine import DialogueEngine
 from banban.knowledge.handle import KnowledgeHandler
 from banban.knowledge.intents import KNOWLEDGE_INTENTS
 from banban.knowledge.providers import ProductAPIProvider, OrderAPIProvider, FAQProvider, RAGProvider
 from banban.knowledge.registry import KnowledgeProviderRegistry
 from banban.knowledge.responder import KnowledgeResponder
+from banban.plan.planner import TurnPlanner
+from banban.plan.validator import TurnPlanValidator
 from banban.task.action.builder import build_action_runner
 from banban.task.commands.processor import CommandProcessor
 from banban.task.flows.executor import FlowExecutor
@@ -39,7 +43,24 @@ def build_dialogue_engine()->DialogueEngine:
         ]),
         knowledge_responder = KnowledgeResponder()
     )
+
+    # 3.创建ChitchatHandler实例
+    chitchat_handler = ChitchatHandler()
+
+    # 4.创建TurnPlanner实例
+    turn_planner = TurnPlanner()
+
+    # 5.创建TurnPlanValidator
+    turn_plan_validator = TurnPlanValidator()
+
+    # 6.创建ClarifyResponder
+    clarify_responder = ClarifyResponder()
+
     return DialogueEngine(
         task_handler = task_handler,
         knowledge_handler = knowledge_handler,
+        chitchat_handler=chitchat_handler,
+        turn_planner=turn_planner,
+        turn_plan_validator=turn_plan_validator,
+        clarify_responder=clarify_responder
     )
