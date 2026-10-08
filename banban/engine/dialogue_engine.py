@@ -4,9 +4,15 @@ from typing import List
 
 from banban.domain.messages import UserMessage, ProcessResult, BotMessage, MessageObject, MessageType
 from banban.domain.state import DialogueState, Turn
+from banban.plan.models import TurnPlan, TaskTurnPlan
+from banban.task.commands.models import SetSlotsCommand
+from banban.task.handler import TaskHandler
 
 
 class DialogueEngine:
+
+    def __init__(self, task_handler: TaskHandler):
+        self.task_handler = task_handler
 
     async def process(self,user_message:UserMessage,state:DialogueState)->ProcessResult:
         # 1.准备会话
@@ -60,8 +66,23 @@ class DialogueEngine:
             state.update_session_last_activity()
 
     async def _handle_text_message(self,user_message:UserMessage,state:DialogueState)->List[BotMessage]:
-        # TODO 文本消息处理
-        return [BotMessage(text="文本消息处理的机器回复")]
+        # 1.意图识别(模拟)
+        turn_plan = TurnPlan(
+            task=TaskTurnPlan(
+                commands=[
+                    SetSlotsCommand(
+                        command="set_slots",
+                        slots={"order_number": "A20260408002"}
+                    )
+                ]
+            ),
+            knowledge=None,
+            chitchat=None
+        )
+        # 2.结构化命令校验
+        # 3.轨道分发处理
+        messages = await self.task_handler.handle(turn_plan.task.commands,state)
+        return messages
 
     async def _handle_object_message(self,user_message:UserMessage,state:DialogueState)->List[BotMessage]:
         # TODO 对象消息处理

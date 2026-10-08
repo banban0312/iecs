@@ -1,11 +1,8 @@
 from typing import Dict, Any
 
-from banban.conf.config import settings
 from banban.domain.state import DialogueState
-from banban.infrastructure.http_util import http_client
 from banban.task.action.base import Action, ActionResult
 from banban.task.action.custom.shared import fetch_order, _build_order_summary
-
 
 class LookupOrderStatusAction(Action):
 

@@ -2,7 +2,7 @@ from typing import Any
 from urllib.parse import quote
 
 from banban.conf.config import settings
-from banban.infrastructure.http_util import http_client
+from banban.infrastructure import http_util
 
 
 def _base_url() -> str:
@@ -16,7 +16,7 @@ def _extract_data(result: dict | None) -> dict | None:
 
 async def fetch_order(order_id: str) -> dict | None:
     try:
-        r = await http_client.get(f"{_base_url()}/orders/{quote(order_id)}")
+        r = await http_util.http_client.get(f"{_base_url()}/orders/{quote(order_id)}")
         return _extract_data(r.json())
     except Exception:
         return None
@@ -24,7 +24,7 @@ async def fetch_order(order_id: str) -> dict | None:
 
 async def fetch_logistics(order_id: str) -> dict | None:
     try:
-        r = await http_client.get(f"{_base_url()}/orders/{quote(order_id)}/logistics")
+        r = await http_util.http_client.get(f"{_base_url()}/orders/{quote(order_id)}/logistics")
         return _extract_data(r.json())
     except Exception:
         return None
@@ -32,7 +32,7 @@ async def fetch_logistics(order_id: str) -> dict | None:
 
 async def fetch_product(product_id: str) -> dict | None:
     try:
-        r = await http_client.get(f"{_base_url()}/products/{quote(product_id)}")
+        r = await http_util.http_client.get(f"{_base_url()}/products/{quote(product_id)}")
         return _extract_data(r.json())
     except Exception:
         return None
