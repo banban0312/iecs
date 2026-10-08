@@ -3,7 +3,7 @@ from typing import Dict, Any
 
 from banban.conf.config import settings
 from banban.domain.state import DialogueState
-from banban.infrastructure.http_util import http_client
+from banban.infrastructure import http_util
 from banban.task.action.base import Action, ActionResult
 
 
@@ -19,7 +19,7 @@ class SubmitRefundRequestAction(Action):
         # 2.调用业务后端创建退款申请
         url = f"{settings.commerce_api_base_url.rstrip('/')}/orders/{quote(order_number)}/refund-applications"
         try:
-            response = await http_client.post(url, json={"reason": refund_reason or "", "submitted_by": "system"})
+            response = await http_util.http_client.post(url, json={"reason": refund_reason or "", "submitted_by": "system"})
             result = response.json()
         except Exception:
             return ActionResult(slot_updates={

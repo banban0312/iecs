@@ -1,24 +1,29 @@
-from requests.packages import target
+from typing import List
 
-from banban.domain.contexts import TaskContext, InterruptedSystemContext, StartedSystemContext, CanceledSystemContext, \
+from banban.domain.contexts import TaskContext, StartedSystemContext, InterruptedSystemContext, CanceledSystemContext, \
     ResumedSystemContext
 from banban.domain.state import DialogueState
-from banban.task.commands.models import Command, StartFlowCommand, SetSlotsCommand, CancelFlowCommand, ResumeFlowCommand
-from banban.task.flows.models import Flow, FlowsList
+from banban.task.commands.models import Command, StartFlowCommand, SetSlotsCommand, CancelFlowCommand, \
+    ResumeFlowCommand
+from banban.task.flows.models import FlowsList, Flow
 
 
 class CommandProcessor:
 
-    def process_command(self,commands: list[Command],state: DialogueState)->None:
+    # "请继续帮我完成退款"
+    # commands:[
+    #   ResumeFlowCommand(command="resume_flow", flow="refund_request")
+    # ]
+    def process_command(self,commands:List[Command],state:DialogueState,flows_list:FlowsList)->None:
         for command in commands:
             if isinstance(command, StartFlowCommand):
-                self._handle_start_flow(command, state)
+                self._handle_start_flow(command, state,flows_list)
             elif isinstance(command, SetSlotsCommand):
                 self._handle_set_slots(command, state)
             elif isinstance(command, CancelFlowCommand):
-                self._handle_cancle_flow(command, state)
+                self._handle_cancel_flow(state,flows_list)
             elif isinstance(command, ResumeFlowCommand):
-                self._handle_resume_flow(command, state)
+                self._handle_resume_flow(command, state,flows_list)
 
     def _handle_start_flow(self, command: StartFlowCommand, state: DialogueState,flows_list:FlowsList):
         """

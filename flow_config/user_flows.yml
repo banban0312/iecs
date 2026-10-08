@@ -147,8 +147,13 @@ flows:
       - id: refund_submitted
         type: action
         action: action_submit_refund_request
+        next: check_refund_result
+
+      # 判定步骤：放在 action 之后，此刻 order_submit_status 才已写入 slots。
+      - id: check_refund_result
+        type: start
         next:
-          - if: "slots.order_submit_status == 'success'"
+          - if: "slots.get('order_submit_status') == 'success'"
             then: show_refund_status_ok
           - else: show_refund_status_error
 
