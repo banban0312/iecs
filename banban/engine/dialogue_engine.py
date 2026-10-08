@@ -4,6 +4,7 @@ from typing import List
 
 from banban.domain.messages import UserMessage, ProcessResult, BotMessage, MessageObject, MessageType
 from banban.domain.state import DialogueState, Turn
+from banban.knowledge.handle import KnowledgeHandler
 from banban.plan.models import TurnPlan, TaskTurnPlan
 from banban.task.commands.models import SetSlotsCommand
 from banban.task.handler import TaskHandler
@@ -11,8 +12,14 @@ from banban.task.handler import TaskHandler
 
 class DialogueEngine:
 
-    def __init__(self, task_handler: TaskHandler):
+    def __init__(
+            self,
+            task_handler: TaskHandler,
+            knowledge_handler: KnowledgeHandler,
+
+    ):
         self.task_handler = task_handler
+        self.knowledge_handler = knowledge_handler
 
     async def process(self,user_message:UserMessage,state:DialogueState)->ProcessResult:
         # 1.准备会话

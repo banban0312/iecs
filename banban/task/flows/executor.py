@@ -70,8 +70,8 @@ class FlowExecutor:
                 condition = next_link.condition  # "context.reason == 'clarification_rejected'"
                 globals = {"__builtins__": {}}
                 locals = {
-                    "slots": state.active_task.slots,
-                    "context": state.active_system_task.to_dict()
+                    "slots": state.active_task.slots if state.active_task is not None else {},
+                    "context": state.active_system_task.to_dict() if state.active_system_task is not None else {}
                 }
                 # eval(expression, globals, locals)
                 # expression ： 要执行的字符串类型的条件表达式
