@@ -2,51 +2,23 @@ import uuid
 
 from fastapi import APIRouter, Depends
 
-from banban.api.deps import get_dialogue_service
-from banban.api.schemas import ChatHistoryResponse, ChatResponse, ChatRequest, BotMessageResponse, ChatObjectPayload, \
-    ChatHistoryMessageResponse
+from banban.api.deps import get_dialogue_service, get_history_service
+from banban.api.schemas import ChatHistoryResponse, ChatResponse, ChatRequest, BotMessageResponse, ChatObjectPayload
 from banban.domain.messages import UserMessage, ProcessResult
 from banban.service.dialogue_service import DialogueService
+from banban.service.history_service import HistoryService
 
 router = APIRouter()
 
 @router.get("/api/chat/history", response_model=ChatHistoryResponse)
-async def chat_history(sender_id:str):
-    print("sender_id:", sender_id)
-    # TODO 调用service查询当前用户的历史记录
+async def chat_history(
+        sender_id:str,
+        history_service:HistoryService = Depends(get_history_service)
+):
+    messages = await history_service.list_history(sender_id)
+    # turns（领域模型）--> ChatHistoryResponse(交互模型)
     return ChatHistoryResponse(
-        sender_id=sender_id,
-        messages=[
-            ChatHistoryMessageResponse(
-                role="user",
-                text="你好呀",
-                object=None
-            ),
-            ChatHistoryMessageResponse(
-                role="bot",
-                text="你好，很高兴为你服务。",
-                object=None
-            ),
-            ChatHistoryMessageResponse(
-                role="user",
-                text="请给我推荐一款U盘？",
-                object=None
-            ),
-            ChatHistoryMessageResponse(
-                role="bot",
-                text=None,
-                object=ChatObjectPayload(
-                    type="product",
-                    id="1234567890",
-                    title="联想U盘-128GB",
-                    attributes={
-                        "size": "128GB",
-                        "color": "white",
-                        "price": "49.99"
-                    }
-                )
-            ),
-        ]
+        sender_id=sender_id, messages=messages
     )
 
 @router.post("/api/chat",response_model=ChatResponse)

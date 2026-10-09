@@ -11,6 +11,8 @@ class ChatObjectPayload(BaseModel):
 class ChatHistoryMessageResponse(BaseModel):
     """历史记录中的一条消息"""
     role: str
+    session_id:str
+    session_started_at: float
     text: str|None = None
     object: ChatObjectPayload | None = None
 

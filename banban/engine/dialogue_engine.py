@@ -3,6 +3,7 @@ import uuid
 from typing import List
 
 from banban.chitchat.handler import ChitchatHandler
+from banban.clarify.reason import ClarifyReason
 from banban.clarify.responder import ClarifyResponder
 from banban.domain.messages import UserMessage, ProcessResult, BotMessage, MessageObject, MessageType
 from banban.domain.state import DialogueState, Turn
@@ -10,7 +11,7 @@ from banban.knowledge.handle import KnowledgeHandler
 from banban.plan.models import TurnPlan, TaskTurnPlan
 from banban.plan.planner import TurnPlanner
 from banban.plan.validator import TurnPlanValidator
-from banban.task.commands.models import SetSlotsCommand
+from banban.task.commands.models import SetSlotsCommand, Command
 from banban.task.handler import TaskHandler
 
 
@@ -104,5 +105,33 @@ class DialogueEngine:
         return messages
 
     async def _handle_object_message(self,user_message:UserMessage,state:DialogueState)->List[BotMessage]:
-        # TODO 对象消息处理
-        return [BotMessage(text="对象消息处理的机器回复")]
+        # 1.将用户消息中的对象设置到state的focused_object(聚焦对象)
+        state.set_focused_object(user_message.object)
+        # 2.判断此对象是否用来为任务进行数据填槽，如果可以填槽，则生成填槽指令
+        command: Command | None = None
+        if state.active_task is not None and state.active_system_task is not None and isinstance(state.active_system_task,CollectSystemContext):
+            if state.active_system_task.slot_name == "order_number" and user_message.object.type == "order":
+                # 可以填槽，创建填槽指令
+                command = SetSlotsCommand(
+                    command="set_slots",
+                    slots={
+                        "order_number":user_message.object.id
+                    }
+                )
+            if state.active_system_task.slot_name == "product_id" and user_message.object.type == "product":
+                # 可以填槽，创建填槽指令
+                command = SetSlotsCommand(
+                    command="set_slots",
+                    slots={
+                        "product_id":user_message.object.id
+                    }
+                )
+        # 3.判断command是否为None
+        if command is not None:
+            # 如果command不为None，则表示填槽成功，进入到任务轨道
+            messages = await self.task_handler.handle([command], state)
+        else:
+            # 如果command为None，则表示填槽失败，进入到澄清轨道
+            messages = await self.clarify_responder.respond(state, ClarifyReason.OBJECT_REQUIRES_INTENT)
+
+        return messages

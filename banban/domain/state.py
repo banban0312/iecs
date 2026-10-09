@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any, List
 
 from banban.domain.contexts import TaskContext, SystemContext
-from banban.domain.messages import BotMessage, UserMessage
+from banban.domain.messages import BotMessage, UserMessage, MessageObject
 
 
 @dataclass(slots=True)
@@ -212,5 +212,8 @@ class DialogueState:
 
     def end_task(self):
         self.active_task = None
+
+    def set_focused_object(self,object:MessageObject):
+        self.focused_object = FocusedObject(**object.to_dict())
 
 

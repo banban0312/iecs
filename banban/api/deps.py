@@ -8,7 +8,7 @@ from banban.infrastructure import database
 from banban.repository.dialogue_state_repository import DialogueStateRepository
 from banban.service.dialogue_service import DialogueService
 from banban.engine.builder import build_dialogue_engine
-
+from banban.service.history_service import HistoryService
 
 
 async def get_session()->AsyncSession:
@@ -31,3 +31,9 @@ def get_dialogue_service(
         engine: DialogueEngine = Depends(get_dialogue_engine),
 )->DialogueService:
     return DialogueService(repository,engine)
+
+@lru_cache()
+def get_history_service(
+        repository: DialogueStateRepository = Depends(get_dialogue_state_repository),
+):
+    return HistoryService(repository)
