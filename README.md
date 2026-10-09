@@ -159,14 +159,14 @@ HTTP/WebSocket 请求
 
 ### 项目设计理念
 
-<img width="2377" height="809" alt="项目设计理念" src="https://github.com/user-attachments/assets/b53a9ae1-6918-4017-b36d-2f09f0eed948" />
+<img width="2377" height="809" alt="项目设计理念" src="assets/images/design-concept.png" />
 
 ### 系统整体架构
 
 > 智能客服系统构建在原生电商业务系统之上，复用其用户、订单等业务数据，
 > 自身只负责对话编排与客服侧状态持久化。图中左侧的电商前端为传统电商业务，非本项目开发重点。
 
-<img width="2314" height="746" alt="系统整体架构" src="https://github.com/user-attachments/assets/568e47d4-505a-43a7-9b79-636efa29d657" />
+<img width="2314" height="746" alt="系统整体架构" src="assets/images/system-architecture.png" />
 
 ### 智能客服后端分层设计
 
@@ -189,7 +189,7 @@ Engine 层的核心组件：
 - `ChitchatHandler`：负责闲聊与兜底回复
 - `ClarifyResponder`：用户问题的澄清处理
 
-<img width="2457" height="891" alt="智能客服后端分层设计" src="https://github.com/user-attachments/assets/0c7f3ceb-f477-48ae-a6cb-4b7c65bbe972" />
+<img width="2457" height="891" alt="智能客服后端分层设计" src="assets/images/backend-layers.png" />
 
 ## 分层与模块设计（原型图）
 
@@ -197,7 +197,7 @@ Engine 层的核心组件：
 
 ### 1. API 层 · 接口定义
 
-![API 层 · 接口定义](docs/images/01-api-layer.png)
+![API 层 · 接口定义](assets/images/01-api-layer.png)
 
 - 前端所有请求统一经 `router` 分发：业务数据走 `/commerce/*`（转发到电商业务后端），客服对话走 `/api/*`。
 - 客服后端对外只暴露两个 HTTP 接口：
@@ -220,7 +220,7 @@ Engine 层的核心组件：
 
 ### 2. Service 层 · 交互模型与领域模型
 
-![Service 层设计](docs/images/02-service-layer.png)
+![Service 层设计](assets/images/02-service-layer.png)
 
 - **交互模型**：定义 API 层接口的参数与返回值结构（`ChatRequest` / `ChatResponse`），面向外部协议。
 - **领域模型**：Service 层在业务处理过程中的数据结构（`UserMessage` / `ProcessResult` / `BotMessage`），面向内部逻辑。
@@ -229,7 +229,7 @@ Engine 层的核心组件：
 
 ### 3. Repository 层 · 用户状态存储
 
-![Repository 层](docs/images/03-repository-layer.png)
+![Repository 层](assets/images/03-repository-layer.png)
 
 `DialogueStateRepository` 负责对话状态的读写，对上层屏蔽存储细节：
 
@@ -245,7 +245,7 @@ Engine 层的核心组件：
 
 ### 4. 领域层 · DialogueState 数据结构
 
-![DialogueState 数据结构](docs/images/04-dialogue-state-model.png)
+![DialogueState 数据结构](assets/images/04-dialogue-state-model.png)
 
 `DialogueState` 记录 / 存储某一个用户的对话状态，是引擎推进流程的唯一依据：
 
@@ -272,7 +272,7 @@ Engine 层的核心组件：
 
 ### 5. Engine 层 · 一轮对话的处理流程
 
-![DialogueEngine 业务逻辑流程](docs/images/05-dialogue-engine-flow.png)
+![DialogueEngine 业务逻辑流程](assets/images/05-dialogue-engine-flow.png)
 
 `DialogueEngine.process(user_message, state)` 处理一轮对话，共六个阶段：
 
@@ -287,7 +287,7 @@ Engine 层的核心组件：
 
 ### 6. 意图识别 · TurnPlanner 输出结果的结构化约束
 
-![TurnPlanner 输出结果的结构化约束](docs/images/06-turn-planner-output.png)
+![TurnPlanner 输出结果的结构化约束](assets/images/06-turn-planner-output.png)
 
 `TurnPlanner` 通过 LLM 对用户自然语言做三项判断：**① 进入哪个轨道？② 在该轨道做什么操作？③ 若为任务轨道，匹配哪个任务（流程）？**
 
@@ -325,7 +325,7 @@ Engine 层的核心组件：
 
 ### 7. 意图识别 · TurnPlanner 生成结构化命令的实现流程
 
-![TurnPlanner 生成结构化命令的实现流程](docs/images/07-turn-planner-pipeline.png)
+![TurnPlanner 生成结构化命令的实现流程](assets/images/07-turn-planner-pipeline.png)
 
 输入 `state`、`flows`、`knowledge_intents`，三步产出结构化命令：
 
@@ -335,7 +335,7 @@ Engine 层的核心组件：
 
 ### 8. 意图识别 · TurnPlan 数据模型
 
-![TurnPlan 数据模型](docs/images/08-turn-plan-model.png)
+![TurnPlan 数据模型](assets/images/08-turn-plan-model.png)
 
 `TurnPlan` 用来存储意图识别后生成的结构化命令，通过 `from_dict` 从 JSON 还原：
 
@@ -349,7 +349,7 @@ Engine 层的核心组件：
 
 ### 9. 任务轨道 · TaskHandler 实现思路
 
-![TaskHandler 实现思路](docs/images/09-task-handler.png)
+![TaskHandler 实现思路](assets/images/09-task-handler.png)
 
 `DialogueEngine` 把 `turn_plan.task` 的命令清单与 `state` 交给 `TaskHandler(flowslist)`，内部两步协作：
 
@@ -371,7 +371,7 @@ Engine 层的核心组件：
 
 ### 10. 任务轨道 · Flow 数据模型
 
-![Flow 数据模型](docs/images/10-flow-model.png)
+![Flow 数据模型](assets/images/10-flow-model.png)
 
 - `FlowsList`：`slots: dict[str, FlowSlot]`、`flows: list[Flow]`。
 - `Flow`：`id` / `name` / `description` / `steps: list[FlowStep]` / `slots: list[FlowSlot]`。
@@ -388,7 +388,7 @@ Engine 层的核心组件：
 
 ### 11. 知识轨道 · KnowledgeHandler
 
-![KnowledgeHandler 轨道](docs/images/11-knowledge-handler.png)
+![KnowledgeHandler 轨道](assets/images/11-knowledge-handler.png)
 
 `DialogueEngine` 把知识意图清单（如 `["refund_policy", "price_protected_policy"]`）交给 `KnowledgeHandler`，三步检索并回答：
 
@@ -430,7 +430,7 @@ Provider 约定：每个 Provider 有唯一的 `provider_id`，且都必须实�
 ├── pyproject.toml                # 项目元信息与依赖声明
 ├── uv.lock                       # 依赖版本锁定，请勿手改
 ├── .env.example                  # 配置模板
-├── docs/images/                  # README 设计原型图
+├── assets/images/                  # README 配图（架构图 + 分层原型图）
 ├── flow_config/                  # YAML 流程定义
 │   ├── user_flows.yml            # 用户任务流程（订单状态、物流、退款、相似商品推荐…）
 │   └── system_flows.yml          # 系统流程（信息收集、澄清、打断 / 恢复 / 取消…）
